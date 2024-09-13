@@ -38,21 +38,43 @@ public class Cinema {
      * Cuenta la cantidad de seats disponibles en el cine.
      */
     public int countAvailableSeats() {
-        ...
+        int count = 0;
+        for (int i = 0; i < seats.length; i++) {
+            for (int j = 0; j < seats[i].length; j++) {
+                if (seats[i][j].isAvailable()) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     /**
      * Busca la primera butaca libre dentro de una fila o null si no encuentra.
      */
     public Seat findFirstAvailableSeatInRow(int row) {
-        ...
+        if(row>seats.length){
+            return null;
+        }
+        for (int j = 0; j < seats[row].length; j++) {
+            if (seats[row][j].isAvailable()) {
+                return seats[row][j];
+            }
+        }
+        return null;
     }
 
     /**
      * Busca la primera butaca libre o null si no encuentra.
      */
     public Seat findFirstAvailableSeat() {
-        ...
+        for (int i = 0; i < seats.length; i++) {
+            Seat availableseat = findFirstAvailableSeatInRow(i);
+            if (null != availableseat) {
+                return availableseat;
+            }
+        }
+        return null;
     }
 
     /**
@@ -63,17 +85,39 @@ public class Cinema {
      * @return La primer butaca de la serie de N butacas, si no hay retorna null.
      */
     public Seat getAvailableSeatsInRow(int row, int amount) {
-        ...
+        int count =0;
+        Seat first_seat=seats[row][1];
+        for (int j = 0; j < seats[row].length; j++) {
+            if (seats[row][j].isAvailable()) {
+                if (count == 0) {
+                    first_seat = seats[row][j];
+                }
+                count++;
+                if (count == amount) {
+                    return first_seat;
+                }
+            } else {
+                count = 0;
+            }
+        }
+        return null;
     }
 
-    /**
-     * Busca en toda la sala N butacas libres consecutivas. Si las encuentra
-     * retorna la primer butaca de la serie, si no retorna null.
-     *
-     * @param amount el número de butacas pedidas.
-     */
+
+        /**
+         * Busca en toda la sala N butacas libres consecutivas. Si las encuentra
+         * retorna la primer butaca de la serie, si no retorna null.
+         *
+         * @param amount el número de butacas pedidas.
+         */
     public Seat getAvailableSeats(int amount) {
-        ...
+        for (int i = 0; i < seats.length; i++) {
+            Seat availableSeats = getAvailableSeatsInRow(i,amount);
+            if (null != availableSeats) {
+                return availableSeats;
+            }
+        }
+        return null;
     }
 
     /**
@@ -83,8 +127,29 @@ public class Cinema {
      * @param amount la cantidad de butacas a reservar.
      */
     public void takeSeats(Seat seat, int amount) {
-        ...
+        int row = seat.getRow();
+        int seatNumber = seat.getSeatNumber();
+        int SeatsAvailableInRow=0;
+        for(int j = seatNumber; j < seats[row].length; j++) {
+            if(seats[row][j].isAvailable()){
+                SeatsAvailableInRow++;
+            }
+            else{
+                break;
+            }
+        }
+        if (SeatsAvailableInRow < amount) {
+            throw new ArrayIndexOutOfBoundsException("No hay suficientes asientos disponibles.");
+        }
+
+
+        for (int j = seatNumber; j < amount; j++) {
+            if (seats[row][j].isAvailable()) {
+                seats[row][j].takeSeat();
+            }
+        }
     }
+
 
     /**
      * Libera la cantidad de butacas consecutivas empezando por la que se le pasa.
@@ -93,6 +158,8 @@ public class Cinema {
      * @param amount la cantidad de butacas a liberar.
      */
     public void releaseSeats(Seat seat, int amount) {
-        ...
+        for (int j = seat.getSeatNumber(); j < amount; j++) {
+                seats[seat.getRow()][j].releaseSeat();
+        }
     }
 }
